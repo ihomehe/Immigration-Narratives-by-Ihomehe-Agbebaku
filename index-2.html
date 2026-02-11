@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Immigration Narratives in Crisis</title>
+<meta name="description" content="An interactive scrollytelling piece exploring how Canadians discussed immigration during the 2023 housing crisis. Based on research by Nicholas A.R. Fraser.">
+<meta property="og:title" content="Immigration Narratives in Crisis">
+<meta property="og:description" content="What did Canadians actually say about immigration during the housing crisis? The answer might surprise you.">
+<meta property="og:type" content="website">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ===== THEME VARIABLES ===== */
+:root {
+  --transition-theme: 0.5s ease;
+}
+[data-theme="dark"] {
+  --bg-primary: #0B1520;
+  --bg-secondary: #12243A;
+  --bg-card: #1E3550;
+  --bg-card-hover: #254060;
+  --bg-insight: linear-gradient(135deg, #12243A, #1E3550);
+  --text-primary: #FFFFFF;
+  --text-body: #D6E4F0;
+  --text-muted: #7A8FA8;
+  --accent: #4A90D9;
+  --accent-light: #6BB5E0;
+  --warm: #E8A44A;
+  --warm-light: #F2C97D;
+  --red: #D45B5B;
+  --red-light: #E88A8A;
+  --green: #5BAD7A;
+  --green-light: #8DD4A4;
+  --border-subtle: rgba(74,144,217,0.1);
+  --shadow-card: 0 8px 30px rgba(0,0,0,0.3);
+  --particle-color: rgba(74,144,217,0.15);
+  --bar-track: rgba(255,255,255,0.05);
+}
+[data-theme="light"] {
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #EDF2F7;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F7FAFC;
+  --bg-insight: linear-gradient(135deg, #EDF2F7, #E2E8F0);
+  --text-primary: #1A202C;
+  --text-body: #4A5568;
+  --text-muted: #A0AEC0;
+  --accent: #2B6CB0;
+  --accent-light: #4299E1;
+  --warm: #C67A1A;
+  --warm-light: #D69E2E;
+  --red: #C53030;
+  --red-light: #E53E3E;
+  --green: #2F855A;
+  --green-light: #48BB78;
+  --border-subtle: rgba(0,0,0,0.08);
+  --shadow-card: 0 4px 20px rgba(0,0,0,0.08);
+  --particle-color: rgba(43,108,176,0.08);
+  --bar-track: rgba(0,0,0,0.06);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-body);
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 18px;
+  line-height: 1.7;
+  overflow-x: hidden;
+  transition: background var(--transition-theme), color var(--transition-theme);
+}
+
+/* ===== SCROLL ANIMATIONS ===== */
+.reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-left { opacity: 0; transform: translateX(-60px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal-left.visible { opacity: 1; transform: translateX(0); }
+.reveal-right { opacity: 0; transform: translateX(60px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal-right.visible { opacity: 1; transform: translateX(0); }
+.reveal-scale { opacity: 0; transform: scale(0.85); transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal-scale.visible { opacity: 1; transform: scale(1); }
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--warm));
+  z-index: 1000; transition: width 0.1s linear;
+}
+
+/* ===== THEME TOGGLE ===== */
+.theme-toggle {
+  position: fixed; top: 20px; right: 20px; z-index: 1001;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; transition: all 0.3s ease;
+  box-shadow: var(--shadow-card);
+}
+.theme-toggle:hover { transform: scale(1.1); }
+
+/* ===== SOUND TOGGLE ===== */
+.sound-toggle {
+  position: fixed; top: 20px; right: 74px; z-index: 1001;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; transition: all 0.3s ease;
+  box-shadow: var(--shadow-card);
+}
+.sound-toggle:hover { transform: scale(1.1); }
+.sound-toggle.muted { opacity: 0.5; }
+
+/* ===== NAV DOTS ===== */
+.nav-dots {
+  position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
+  z-index: 100; display: flex; flex-direction: column; gap: 12px;
+}
+.nav-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--text-muted); opacity: 0.4; cursor: pointer;
+  transition: all 0.3s ease; border: none;
+}
+.nav-dot.active { opacity: 1; background: var(--warm); transform: scale(1.3); }
+.nav-dot:hover { opacity: 0.8; transform: scale(1.2); }
+
+/* ===== PARTICLES ===== */
+.particles-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+
+/* ===== HERO ===== */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(74,144,217,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(232,164,74,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(74,144,217,0.04) 0%, transparent 50%);
+}
+.hero-content {
+  text-align: center; max-width: 900px; padding: 2rem; position: relative; z-index: 1;
+}
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+  letter-spacing: 4px; text-transform: uppercase; color: var(--warm);
+  margin-bottom: 2rem; opacity: 0; animation: fadeUp 1s ease 0.3s forwards;
+}
+.hero-title {
+  font-family: 'Playfair Display', serif; font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 900; line-height: 1.05; color: var(--text-primary);
+  margin-bottom: 1.5rem; opacity: 0; animation: fadeUp 1s ease 0.6s forwards;
+}
+.hero-title em { font-style: italic; color: var(--warm); }
+.hero-subtitle {
+  font-size: 1.2rem; color: var(--text-muted); max-width: 600px;
+  margin: 0 auto 3rem; opacity: 0; animation: fadeUp 1s ease 0.9s forwards;
+}
+.hero-stats {
+  display: flex; justify-content: center; gap: 3rem;
+  opacity: 0; animation: fadeUp 1s ease 1.2s forwards;
+}
+.hero-stat-num {
+  font-family: 'Playfair Display', serif; font-size: 2.5rem;
+  font-weight: 700; color: var(--accent);
+}
+.hero-stat-label {
+  font-size: 0.8rem; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.scroll-cue {
+  position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+  opacity: 0; animation: fadeUp 1s ease 1.5s forwards;
+}
+.scroll-cue span {
+  display: block; font-size: 0.75rem; color: var(--text-muted);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
+}
+.scroll-arrow {
+  width: 20px; height: 20px;
+  border-right: 2px solid var(--text-muted); border-bottom: 2px solid var(--text-muted);
+  transform: rotate(45deg); margin: 0 auto; animation: bounce 2s ease infinite;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes bounce {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50% { transform: rotate(45deg) translateY(8px); }
+}
+
+/* ===== SECTIONS ===== */
+.section {
+  min-height: 100vh; padding: 8rem 2rem; display: flex;
+  align-items: center; justify-content: center; position: relative; z-index: 1;
+}
+.section-inner { max-width: 1000px; width: 100%; }
+.section-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 3px; text-transform: uppercase; color: var(--warm); margin-bottom: 1rem;
+}
+.section-title {
+  font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700; color: var(--text-primary); margin-bottom: 1.5rem; line-height: 1.15;
+  transition: color var(--transition-theme);
+}
+.section-body {
+  font-size: 1.1rem; color: var(--text-body); max-width: 700px; margin-bottom: 2rem;
+}
+.section-divider {
+  width: 60px; height: 3px; background: var(--warm); margin: 1.5rem 0; border-radius: 2px;
+}
+
+.section-alt {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background var(--transition-theme);
+}
+.section-base {
+  background: var(--bg-primary);
+  transition: background var(--transition-theme);
+}
+
+/* ===== TIMELINE ===== */
+.timeline {
+  position: relative; margin: 3rem 0; padding-left: 40px;
+}
+.timeline::before {
+  content: ''; position: absolute; left: 15px; top: 0; bottom: 0;
+  width: 2px; background: var(--accent); opacity: 0.3;
+}
+.tl-item {
+  position: relative; margin-bottom: 2rem; padding-left: 20px;
+}
+.tl-item::before {
+  content: ''; position: absolute; left: -32px; top: 6px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--accent); border: 2px solid var(--bg-primary);
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+.tl-item.peak::before { background: var(--warm); width: 16px; height: 16px; left: -34px; top: 4px; }
+.tl-date {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+  color: var(--accent); letter-spacing: 1px; margin-bottom: 0.2rem;
+}
+.tl-item.peak .tl-date { color: var(--warm); }
+.tl-title {
+  font-family: 'Playfair Display', serif; font-size: 1.1rem;
+  color: var(--text-primary); margin-bottom: 0.3rem;
+  transition: color var(--transition-theme);
+}
+.tl-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+/* ===== STAT CARDS ===== */
+.stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2rem 0; }
+.stat-card {
+  background: var(--bg-card); border-radius: 8px; padding: 2rem;
+  border-left: 3px solid var(--accent);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background var(--transition-theme);
+  box-shadow: var(--shadow-card);
+}
+.stat-card:hover { transform: translateY(-4px); }
+.stat-card .big-num {
+  font-family: 'Playfair Display', serif; font-size: 3rem;
+  font-weight: 700; color: var(--accent); line-height: 1; margin-bottom: 0.3rem;
+}
+.stat-card .stat-desc { font-size: 1rem; color: var(--text-body); }
+.stat-card .stat-sub { font-size: 0.85rem; color: var(--warm); font-style: italic; margin-top: 0.3rem; }
+.stat-card.warm-border { border-left-color: var(--warm); }
+.stat-card.warm-border .big-num { color: var(--warm); }
+
+/* ===== HYPOTHESIS CARDS ===== */
+.hyp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0; }
+.hyp-card {
+  background: var(--bg-card); border-radius: 8px; padding: 2rem;
+  border-top: 3px solid var(--red); box-shadow: var(--shadow-card);
+  transition: background var(--transition-theme);
+}
+.hyp-card.green { border-top-color: var(--green); }
+.hyp-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem;
+}
+.hyp-card .hyp-tag { color: var(--red); }
+.hyp-card.green .hyp-tag { color: var(--green); }
+.hyp-name {
+  font-family: 'Playfair Display', serif; font-size: 1.5rem;
+  font-weight: 700; color: var(--text-primary); margin-bottom: 1rem;
+  transition: color var(--transition-theme);
+}
+.hyp-body { font-size: 0.95rem; color: var(--text-body); line-height: 1.6; }
+
+/* ===== CHART CONTAINER ===== */
+.chart-container {
+  margin: 2.5rem 0; background: var(--bg-card); border-radius: 8px;
+  padding: 2rem; box-shadow: var(--shadow-card);
+  transition: background var(--transition-theme);
+}
+.chart-title {
+  font-family: 'Source Sans 3', sans-serif; font-size: 1rem;
+  font-weight: 600; color: var(--text-primary); margin-bottom: 0.3rem;
+  transition: color var(--transition-theme);
+}
+.chart-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+/* ===== BAR CHARTS ===== */
+.bar-row { display: flex; align-items: center; margin-bottom: 1rem; gap: 1rem; }
+.bar-label {
+  width: 110px; font-size: 0.85rem; color: var(--text-body);
+  text-align: right; flex-shrink: 0;
+}
+.bar-track {
+  flex: 1; height: 32px; background: var(--bar-track);
+  border-radius: 4px; position: relative; overflow: hidden;
+}
+.bar-fill {
+  height: 100%; border-radius: 4px; width: 0;
+  transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex; align-items: center; padding-left: 10px;
+}
+.bar-value {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+  color: #fff; font-weight: 500;
+}
+.bar-accent { background: linear-gradient(90deg, var(--accent), var(--accent-light)); }
+.bar-warm { background: linear-gradient(90deg, var(--warm), var(--warm-light)); }
+.bar-red { background: linear-gradient(90deg, var(--red), var(--red-light)); }
+.bar-green { background: linear-gradient(90deg, var(--green), var(--green-light)); }
+
+/* ===== VOLUME CHART ===== */
+.volume-chart {
+  display: flex; align-items: flex-end; gap: 4px; height: 250px;
+  margin: 2rem 0 0.5rem; padding-bottom: 30px; position: relative;
+}
+.volume-bar-wrapper {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  height: 100%; justify-content: flex-end;
+}
+.volume-bar {
+  width: 100%; max-width: 50px; background: var(--accent);
+  border-radius: 3px 3px 0 0; height: 0;
+  transition: height 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative; min-height: 2px;
+}
+.volume-bar.peak { background: var(--warm); }
+.volume-bar-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  color: var(--text-muted); position: absolute; top: -18px; left: 50%;
+  transform: translateX(-50%); white-space: nowrap; opacity: 0;
+  transition: opacity 0.5s ease 1.2s;
+}
+.volume-bar.animated .volume-bar-num { opacity: 1; }
+.volume-month { font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; }
+
+/* ===== TWEET CARDS ===== */
+.tweet-card {
+  background: var(--bg-card); border-radius: 8px; padding: 1.5rem 2rem;
+  margin: 1.5rem 0; border-left: 3px solid var(--accent); position: relative;
+  box-shadow: var(--shadow-card); transition: background var(--transition-theme);
+}
+.tweet-card::before {
+  content: '\201C'; font-family: 'Playfair Display', serif; font-size: 4rem;
+  color: var(--warm); opacity: 0.3; position: absolute; top: -5px; left: 12px; line-height: 1;
+}
+.tweet-text {
+  font-size: 1.05rem; color: var(--text-primary); font-style: italic;
+  margin-bottom: 0.8rem; padding-left: 0.5rem;
+  transition: color var(--transition-theme);
+}
+.tweet-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 0.5rem;
+}
+.tweet-author { font-size: 0.85rem; color: var(--text-muted); }
+.tweet-note { font-size: 0.8rem; color: var(--warm); font-weight: 600; text-align: right; }
+.tweet-stats { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); }
+
+/* ===== SENTIMENT ===== */
+.sentiment-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin: 2rem 0; }
+.sentiment-block {
+  text-align: center; padding: 2rem 1rem; background: var(--bg-card);
+  border-radius: 8px; box-shadow: var(--shadow-card);
+  transition: background var(--transition-theme);
+}
+.sentiment-num {
+  font-family: 'Playfair Display', serif; font-size: 2.8rem;
+  font-weight: 700; line-height: 1; margin-bottom: 0.3rem;
+}
+.sentiment-label {
+  font-size: 1rem; font-weight: 600; color: var(--text-primary);
+  margin-bottom: 0.3rem; transition: color var(--transition-theme);
+}
+.sentiment-desc { font-size: 0.8rem; color: var(--text-muted); }
+.sent-red .sentiment-num { color: var(--red); }
+.sent-green .sentiment-num { color: var(--green); }
+.sent-grey .sentiment-num { color: var(--text-muted); }
+
+/* ===== INSIGHT BOX ===== */
+.insight-box {
+  background: var(--bg-insight); border-radius: 8px; padding: 2rem; margin: 2rem 0;
+  border-left: 3px solid var(--warm); box-shadow: var(--shadow-card);
+  transition: background var(--transition-theme);
+}
+.insight-box .insight-title {
+  font-family: 'Playfair Display', serif; font-size: 1.2rem;
+  color: var(--warm); margin-bottom: 0.8rem;
+}
+.insight-box p { font-size: 1rem; color: var(--text-body); line-height: 1.7; }
+
+/* ===== VERDICT ===== */
+.verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0; }
+.verdict-card { padding: 2rem; border-radius: 8px; }
+.verdict-rejected { background: rgba(212,91,91,0.08); border: 1px solid rgba(212,91,91,0.2); }
+.verdict-supported { background: rgba(91,173,122,0.12); border: 1px solid rgba(91,173,122,0.3); }
+.verdict-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px;
+  border-radius: 4px; display: inline-block; margin-bottom: 1rem;
+}
+.verdict-rejected .verdict-badge { background: rgba(212,91,91,0.15); color: var(--red); }
+.verdict-supported .verdict-badge { background: rgba(91,173,122,0.15); color: var(--green); }
+.verdict-card h3 {
+  font-family: 'Playfair Display', serif; font-size: 1.4rem;
+  color: var(--text-primary); margin-bottom: 0.8rem;
+  transition: color var(--transition-theme);
+}
+.verdict-card p { font-size: 0.95rem; color: var(--text-body); line-height: 1.6; }
+
+/* ===== INFLUENCERS ===== */
+.influencer-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 2rem 0; }
+.inf-card {
+  background: var(--bg-card); border-radius: 8px; padding: 1.5rem;
+  text-align: center; border-top: 3px solid var(--warm);
+  transition: transform 0.3s ease, background var(--transition-theme);
+  box-shadow: var(--shadow-card);
+}
+.inf-card:hover { transform: translateY(-6px); }
+.inf-name {
+  font-family: 'Playfair Display', serif; font-size: 1.2rem;
+  color: var(--text-primary); margin-bottom: 0.3rem;
+  transition: color var(--transition-theme);
+}
+.inf-role { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; }
+.inf-stat { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; margin-bottom: 0.3rem; }
+.inf-stat .num { color: var(--accent); font-weight: 500; }
+.inf-stat .eng { color: var(--warm); font-weight: 500; }
+
+/* ===== ABOUT / BIO ===== */
+.about-section {
+  padding: 6rem 2rem; background: var(--bg-secondary);
+  border-top: 1px solid var(--border-subtle);
+  transition: background var(--transition-theme);
+  position: relative; z-index: 1;
+}
+.about-inner { max-width: 800px; margin: 0 auto; }
+.about-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 3rem; align-items: start; }
+.about-photo {
+  width: 100%; aspect-ratio: 1; border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--warm));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 4rem; color: #fff;
+}
+.about-name {
+  font-family: 'Playfair Display', serif; font-size: 1.8rem;
+  color: var(--text-primary); margin-bottom: 0.5rem;
+  transition: color var(--transition-theme);
+}
+.about-role {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+  color: var(--warm); letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 1.2rem;
+}
+.about-bio { font-size: 0.95rem; color: var(--text-body); line-height: 1.8; margin-bottom: 1.5rem; }
+.about-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.about-tag {
+  font-size: 0.75rem; padding: 4px 12px; border-radius: 20px;
+  background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border-subtle);
+  transition: background var(--transition-theme);
+}
+
+/* ===== SHARE BAR ===== */
+.share-bar {
+  display: flex; gap: 12px; justify-content: center; margin-top: 2rem;
+  position: relative; z-index: 1;
+}
+.share-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 6px; border: 1px solid var(--border-subtle);
+  background: var(--bg-card); color: var(--text-body); cursor: pointer;
+  font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem;
+  transition: all 0.3s ease; text-decoration: none;
+}
+.share-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); color: var(--text-primary); }
+.share-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+/* ===== CLOSING ===== */
+.closing {
+  min-height: 60vh; display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 4rem 2rem; background: var(--bg-primary);
+  position: relative; z-index: 1;
+  transition: background var(--transition-theme);
+}
+.closing::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(232,164,74,0.06) 0%, transparent 60%);
+}
+.closing-content { position: relative; z-index: 1; max-width: 700px; }
+.closing-takeaway {
+  font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--text-primary); line-height: 1.4; margin-bottom: 2rem;
+  transition: color var(--transition-theme);
+}
+.closing-takeaway em { color: var(--warm); font-style: italic; }
+.closing-credit {
+  font-size: 0.85rem; color: var(--text-muted); line-height: 1.8;
+}
+.closing-credit strong { color: var(--text-body); }
+
+/* ===== FOOTER ===== */
+.footer {
+  padding: 2rem; text-align: center; font-size: 0.75rem;
+  color: var(--text-muted); background: var(--bg-primary);
+  border-top: 1px solid var(--border-subtle); position: relative; z-index: 1;
+  transition: background var(--transition-theme);
+}
+
+/* ===== COUNTER ===== */
+.counter { font-variant-numeric: tabular-nums; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .stat-row, .hyp-grid, .sentiment-row, .verdict-grid, .influencer-cards { grid-template-columns: 1fr; }
+  .hero-stats { flex-direction: column; gap: 1.5rem; }
+  .bar-label { width: 80px; font-size: 0.75rem; }
+  .section { padding: 5rem 1.5rem; }
+  .nav-dots { display: none; }
+  .about-grid { grid-template-columns: 1fr; }
+  .about-photo { max-width: 200px; margin: 0 auto; }
+  body { font-size: 16px; }
+  .theme-toggle { top: 12px; right: 12px; width: 38px; height: 38px; }
+  .sound-toggle { top: 12px; right: 58px; width: 38px; height: 38px; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<canvas class="particles-canvas" id="particlesCanvas"></canvas>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+<button class="sound-toggle muted" id="soundToggle" aria-label="Toggle sound">🔇</button>
+
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero" data-section="0">
+  <div class="hero-content">
+    <p class="hero-eyebrow">CERC Migration &middot; Digital Storytelling</p>
+    <h1 class="hero-title">Immigration Narratives<br>in <em>Crisis</em></h1>
+    <p class="hero-subtitle">When Canada's housing crisis collided with record immigration, what did the online conversation actually reveal?</p>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num counter" data-target="71971">0</div>
+        <div class="hero-stat-label">Posts Analyzed</div>
+      </div>
+      <div>
+        <div class="hero-stat-num counter" data-target="3638">0</div>
+        <div class="hero-stat-label">Peak Month Posts</div>
+      </div>
+      <div>
+        <div class="hero-stat-num counter" data-target="124">0</div>
+        <div class="hero-stat-label">Hand-Coded</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-cue">
+    <span>Scroll to explore</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ==================== TIMELINE ==================== -->
+<section class="section section-alt" data-section="1">
+  <div class="section-inner">
+    <div class="reveal">
+      <p class="section-label">The Build-Up</p>
+      <h2 class="section-title">How we got here</h2>
+      <p class="section-body">The collision between Canada's housing crisis and immigration discourse didn't happen overnight. Here's the pressure building.</p>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item reveal" style="transition-delay:0.1s">
+        <p class="tl-date">2005 – 2020</p>
+        <h3 class="tl-title">Housing prices surge 80%</h3>
+        <p class="tl-desc">Canadian home prices outpace income growth by nearly 3x, squeezing affordability nationwide.</p>
+      </div>
+      <div class="tl-item reveal" style="transition-delay:0.2s">
+        <p class="tl-date">2022</p>
+        <h3 class="tl-title">Canada sets record immigration targets</h3>
+        <p class="tl-desc">Over 1 million newcomers per year — the highest per-capita rate in the G7.</p>
+      </div>
+      <div class="tl-item reveal" style="transition-delay:0.3s">
+        <p class="tl-date">Early 2023</p>
+        <h3 class="tl-title">Housing and immigration start merging in public discourse</h3>
+        <p class="tl-desc">Social media posts mentioning both topics begin climbing. Mainstream media follows.</p>
+      </div>
+      <div class="tl-item reveal" style="transition-delay:0.4s">
+        <p class="tl-date">July – August 2023</p>
+        <h3 class="tl-title">Media frenzy peaks</h3>
+        <p class="tl-desc">Nearly 1,000 newspaper articles cover immigration and Canada, with 465 linking it directly to housing.</p>
+      </div>
+      <div class="tl-item peak reveal" style="transition-delay:0.5s">
+        <p class="tl-date">August 21, 2023</p>
+        <h3 class="tl-title">Housing Minister Sean Fraser blames international students</h3>
+        <p class="tl-desc">The first federal-level statement linking immigration directly to the housing shortage. Social media explodes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CONTEXT ==================== -->
+<section class="section section-base" data-section="2">
+  <div class="section-inner">
+    <div class="reveal">
+      <p class="section-label">The Context</p>
+      <h2 class="section-title">A country under pressure</h2>
+      <p class="section-body">Canada has long been one of the world's most welcoming countries for immigrants. But by 2023, a deepening housing crisis was testing that consensus.</p>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card reveal-left" style="transition-delay:0.2s">
+        <div class="big-num counter" data-target="80" data-suffix="%">0%</div>
+        <div class="stat-desc">increase in average home prices (2005–2020)</div>
+        <div class="stat-sub">vs. only 30% income growth</div>
+      </div>
+      <div class="stat-card warm-border reveal-right" style="transition-delay:0.4s">
+        <div class="big-num">1M+</div>
+        <div class="stat-desc">newcomers per year in 2023</div>
+        <div class="stat-sub">record immigration levels</div>
+      </div>
+    </div>
+
+    <div class="insight-box reveal" style="transition-delay:0.6s">
+      <div class="insight-title">The research question</div>
+      <p>Researcher Nicholas Fraser at Toronto Metropolitan University set out to answer a critical question: <strong style="color:var(--text-primary)">Did social media amplify xenophobia among Canadian users — or did it reflect existing partisan divisions?</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== HYPOTHESES ==================== -->
+<section class="section section-alt" data-section="3">
+  <div class="section-inner">
+    <div class="reveal">
+      <p class="section-label">The Framework</p>
+      <h2 class="section-title">Two competing explanations</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="hyp-grid">
+      <div class="hyp-card reveal-left" style="transition-delay:0.3s">
+        <p class="hyp-tag">Hypothesis 1</p>
+        <h3 class="hyp-name">Amplification</h3>
+        <p class="hyp-body">Social media amplifies xenophobia — users express hostility toward immigrants and construct anti-immigrant narratives blaming them for the housing crisis.</p>
+      </div>
+      <div class="hyp-card green reveal-right" style="transition-delay:0.5s">
+        <p class="hyp-tag">Hypothesis 2</p>
+        <h3 class="hyp-name">Reflection</h3>
+        <p class="hyp-body">Social media reflects partisan frustration — criticism targets government policy failures rather than immigrants themselves, driven by a small number of politically active users.</p>
+      </div>
+    </div>
+
+    <p class="reveal" style="transition-delay:0.7s; font-size:0.95rem; color:var(--text-muted); font-style:italic; margin-top:1rem;">Canada is a crucial case: a historically pro-immigration country now under strain. What happened on social media offers a window into how democracies process crisis.</p>
+  </div>
+</section>
+
+<!-- ==================== THE SPIKE ==================== -->
+<section class="section section-base" data-section="4">
+  <div class="section-inner">
+    <div class="reveal">
+      <p class="section-label">The Data</p>
+      <h2 class="section-title">The August 2023 explosion</h2>
+      <p class="section-body">Fraser analyzed 71,971 English-language posts on X (Twitter) by Canadian users from October 2022 to October 2023. Posts linking immigration and housing surged dramatically in the summer.</p>
+    </div>
+
+    <div class="chart-container reveal-scale" style="transition-delay:0.3s">
+      <div class="chart-title">Twitter/X Posts Linking Immigration and Housing in 2023</div>
+      <div class="chart-subtitle">Monthly volume of posts mentioning both immigration and housing by Canadian users</div>
+      <div class="volume-chart" id="volumeChart"></div>
+    </div>
+
+    <div class="insight-box reveal" style="transition-delay:0.5s">
+      <p>Nearly <strong style="color:var(--warm)">1 in 5</strong> immigration posts (18.75%) mentioned housing. The August peak of 3,638 posts became the focal point of Fraser's qualitative analysis — using VADER sentiment analysis, Detoxify toxicity scoring, and hand-coding of a random 10% sample.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== WORD ASSOCIATIONS ==================== -->
+<section class="section section-alt" data-section="5">
+  <div class="section-inner">
+    <div class="reveal">
+      <p class="section-label">The Language</p>
+      <h2 class="section-title">What words appeared alongside "immigration"?</h2>
+      <p class="section-body">Word association analysis reveals the terms most likely to co-occur with "immigration" — and they tell a story of political framing, not direct hostility.</p>
+    </div>
+
+    <div class="chart-container reveal-scale" style="transition-delay:0.3s">
+      <div class="chart-title">Words most strongly associated with "immigration"</div>
+      <div class="chart-subtitle">Correlation scores (0–1) for terms co-occurring with "immigration" in August 2023 posts</div>
+      <div id="assocChart"></div>
+    </div>
+
+    <div class="insight-box reveal" style="transition-delay:0.5s">
+      <div class="insight-title">What this tells us</div>
+      <p>Users invoked indirect markers — "airports," "veiled," "socioeconomic" — rather than targeting specific groups. Political terms like "conservatives" appeared frequently, suggesting <strong style="color:var(--text-primary)">partisan framing drove much of the conversation</strong>, not grassroots xenophobia.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CENTRAL FINDING ==================== -->
+<section class="section section-base" data-section="6">
+  <div class="section-inner">
+    <div class="reveal">
+      <p class="section-label">The Central Finding</p>
+      <h2 class="section-title">Who did Canadians actually blame?</h2>
+      <p class="section-body">Of 124 hand-coded posts from a random sample, the answer was overwhelming — and surprising.</p>
+    </div>
+
+    <div class="chart-container reveal-scale" style="transition-delay:0.3s">
+      <div class="chart-title">How tweets placed blame for Canada's housing crisis</div>
+      <div class="chart-subtitle">Hand-coded sample of tweets linking immigration and housing (n = 124)</div>
+      <div id="blameChart"></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card reveal-left" style="transition-delay:0.5s; border-left-color:var(--warm)">
+        <div class="big-num" style="color:var(--warm)">88</div>
+        <div class="stat-desc">posts blamed <strong style="color:var(--text-primary)">the government</strong></div>
+        <div class="stat-sub">71% of all coded posts</div>
+      </div>
+      <div class="stat-card reveal-right" style="transition-delay:0.7s; border-left-color:var(--red)">
+        <div class="big-num" style="color:var(--red)">14</div>
+        <div class="stat-desc">posts blamed <strong style="color:var(--text-primary)">immigrants</strong></div>
+        <div class="stat-sub">just 11% of coded posts</div>
+      </div>
+    </div>
+
+    <div class="insight-box reveal" style="transition-delay:0.9s">
+      <div class="insight-title">The negativity was real — but it was aimed at politicians, not newcomers.</div>
+      <p>The overwhelming majority of criticism targeted the Trudeau government and mainstream political parties for allowing high immigration to exacerbate the housing crisis. Immigrants themselves were rarely the target.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== NEGATIVE ≠ HATEFUL ==================== -->
+<section class="section section-alt" data-section="7">
+  <div class="section-inner">
+    <div class="reveal">
+      <p class="section-label">The Distinction</p>
+      <h2 class="section-title">Negative does not mean hateful</h2>
+      <p class="section-body">Automated analysis of all 3,638 August posts confirmed the hand-coded findings — and revealed a crucial nuance.</p>
+    </div>
+
+    <div class="sentiment-row">
+      <div class="sentiment-block sent-red reveal-left" style="transition-delay:0.2s">
+        <div class="sentiment-num counter" data-target="65.7" data-suffix="%">0%</div>
+        <div class="sentiment-label">Negative</div>
+        <div class="sentiment-desc">Critical, dissatisfied</div>
+      </div>
+      <div class="sentiment-block sent-green reveal-scale" style="transition-delay:0.4s">
+        <div class="sentiment-num counter" data-target="28.6" data-suffix="%">0%</div>
+        <div class="sentiment-label">Positive</div>
+        <div class="sentiment-desc">Supportive, constructive</div>
+      </div>
+      <div class="sentiment-block sent-grey reveal-right" style="transition-delay:0.6s">
+        <div class="sentiment-num counter" data-target="5.7" data-suffix="%">0%</div>
+        <div class="sentiment-label">Neutral</div>
+        <div class="sentiment-desc">Factual, detached</div>
+      </div>
+    </div>
+
+    <div class="insight-box reveal" style="transition-delay:0.8s">
+      <div class="insight-title">💡 The key distinction</div>
+      <p><strong style="color:var(--text-primary)">Negative sentiment</strong> means expressing critical opinions or disagreement — a legitimate part of political debate. <strong style="color:var(--text-primary)">Toxicity</strong> means overtly abusive language: insults, threats, hate speech. The Detoxify analysis found <strong style="color:var(--green)">low toxicity</strong> across the dataset. Canadians expressed deep frustration without frequently resorting to hateful language.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== INFLUENCERS ==================== -->
+<section class="section section-base" data-section="8">
+  <div class="section-inner">
+    <div class="reveal">
+      <p class="section-label">The Voices</p>
+      <h2 class="section-title">A small number of influencers dominated the conversation</h2>
+      <p class="section-body">Of the 19 most viral posts, half were authored by just three people — all politically aligned with the Canadian right.</p>
+    </div>
+
+    <div class="influencer-cards">
+      <div class="inf-card reveal-left" style="transition-delay:0.2s">
+        <div class="inf-name">Maxime Bernier</div>
+        <div class="inf-role">Leader, People's Party of Canada</div>
+        <div class="inf-stat"><span class="num">248K followers</span></div>
+        <div class="inf-stat"><span class="eng">7,838 total engagement</span></div>
+      </div>
+      <div class="inf-card reveal-scale" style="transition-delay:0.4s">
+        <div class="inf-name">Eva Chipiuk</div>
+        <div class="inf-role">Lawyer, Trucker Convoy representative</div>
+        <div class="inf-stat"><span class="num">46.5K followers</span></div>
+        <div class="inf-stat"><span class="eng">3,503 total engagement</span></div>
+      </div>
+      <div class="inf-card reveal-right" style="transition-delay:0.6s">
+        <div class="inf-name">Joe Blo</div>
+        <div class="inf-role">Right-wing political influencer</div>
+        <div class="inf-stat"><span class="num">34.5K followers</span></div>
+        <div class="inf-stat"><span class="eng">2,818 total engagement</span></div>
+      </div>
+    </div>
+
+    <div class="insight-box reveal" style="transition-delay:0.8s">
+      <p>These three influencers earned more combined engagement than <strong style="color:var(--text-primary)">CBC News and the National Post combined</strong> — despite having a fraction of their followers. Political actors routinely outperform legacy media in shaping online immigration discourse.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== WHAT THEY SAID ==================== -->
+<section class="section section-alt" data-section="9">
+  <div class="section-inner">
+    <div class="reveal">
+      <p class="section-label">The Content</p>
+      <h2 class="section-title">What the top voices actually said</h2>
+      <p class="section-body">The most viral posts offered provocative fragments — not coherent anti-immigrant policy narratives.</p>
+    </div>
+
+    <div class="tweet-card reveal" style="transition-delay:0.2s">
+      <p class="tweet-text">Immigration to Canada must be HALTED IMMEDIATELY.</p>
+      <div class="tweet-meta">
+        <span class="tweet-author">— Joe Blo, Aug 23, 2023</span>
+        <span class="tweet-note">Provocative demand, no policy rationale</span>
+      </div>
+    </div>
+
+    <div class="tweet-card reveal" style="transition-delay:0.4s">
+      <p class="tweet-text">Are you ready to be forced to take immigrants into your home? Politicians in Canada are already hinting at this.</p>
+      <div class="tweet-meta">
+        <span class="tweet-author">— Maxime Bernier, Aug 14, 2023</span>
+        <span class="tweet-stats">1,038 likes · 520 reposts · 266 replies</span>
+      </div>
+      <div style="text-align:right; margin-top:0.5rem"><span class="tweet-note">Most viral post in the dataset</span></div>
+    </div>
+
+    <div class="tweet-card reveal" style="transition-delay:0.6s">
+      <p class="tweet-text">Canadian universities are not selling education — they're mostly selling the right to work and an easy path to permanent residency.</p>
+      <div class="tweet-meta">
+        <span class="tweet-author">— Maxime Bernier, Aug 23, 2023</span>
+        <span class="tweet-note">Blames institutions, not students</span>
+      </div>
+    </div>
+
+    <div class="tweet-card reveal" style="transition-delay:0.8s">
+      <p class="tweet-text">No one can and should blame people from around the world wanting to come to Canada. The people to blame are those who set levels of immigration without ensuring we could welcome, absorb and integrate immigrants within our means.</p>
+      <div class="tweet-meta">
+        <span class="tweet-author">— Norman Spector, Aug 23, 2023</span>
+        <span class="tweet-note">Defends immigrants, criticizes government</span>
+      </div>
+    </div>
+
+    <div class="insight-box reveal" style="transition-delay:1s">
+      <p>Only <strong style="color:var(--warm)">2 of 19</strong> top posts mentioned international students. None directly referenced Fraser's August 21 comments. The discourse was driven by pre-existing partisan grievances, not a response to specific policy events.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== THE VERDICT ==================== -->
+<section class="section section-base" data-section="10">
+  <div class="section-inner">
+    <div class="reveal">
+      <p class="section-label">The Verdict</p>
+      <h2 class="section-title">Social media reflected partisan anger — not xenophobia</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="verdict-grid">
+      <div class="verdict-card verdict-rejected reveal-left" style="transition-delay:0.3s">
+        <div class="verdict-badge">Not Supported</div>
+        <h3>H1: Amplification</h3>
+        <p>Only 14 of 124 posts blamed immigrants. Toxicity was low. Most criticism targeted policy, not people. Social media did not create or amplify xenophobia.</p>
+      </div>
+      <div class="verdict-card verdict-supported reveal-right" style="transition-delay:0.5s">
+        <div class="verdict-badge">Supported</div>
+        <h3>H2: Reflection</h3>
+        <p>Social media reflected partisan frustration with the Liberal government, driven by a small number of politically aggressive influencers who used immigration as a vehicle for political criticism.</p>
+      </div>
+    </div>
+
+    <div class="insight-box reveal" style="transition-delay:0.7s">
+      <div class="insight-title">Why this matters</div>
+      <p>Dismissing all immigration criticism as xenophobia risks alienating citizens with legitimate policy concerns. A small group of politically motivated influencers can disproportionately shape what <em>appears</em> to be public opinion. Understanding this asymmetry is essential for policymakers, journalists, and anyone interpreting online discourse about migration.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CLOSING ==================== -->
+<section class="closing" data-section="11">
+  <div class="closing-content reveal-scale">
+    <p class="closing-takeaway">Social media didn't create xenophobia during Canada's housing crisis — it revealed where political frustration was <em>really</em> directed: at the government, not at immigrants.</p>
+    <div class="section-divider" style="margin:1.5rem auto"></div>
+    <p class="closing-credit">
+      <strong>Based on research by Nicholas A. R. Fraser</strong><br>
+      Toronto Metropolitan University<br>
+      CERC Migration Narratives Challenge
+    </p>
+
+    <div class="share-bar">
+      <a class="share-btn" id="shareTwitter" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Share on X
+      </a>
+      <a class="share-btn" id="shareLinkedIn" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        Share on LinkedIn
+      </a>
+      <button class="share-btn" id="copyLink">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/></svg>
+        Copy Link
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== ABOUT ==================== -->
+<section class="about-section" data-section="12">
+  <div class="about-inner">
+    <div class="reveal">
+      <p class="section-label">About This Project</p>
+      <div class="section-divider"></div>
+    </div>
+    <div class="about-grid reveal" style="transition-delay:0.3s">
+      <div class="about-photo">IA</div>
+      <div>
+        <h3 class="about-name">Ihomehe Agbebaku</h3>
+        <p class="about-role">Storyteller · Editor · Filmmaker</p>
+        <p class="about-bio">Ihomehe is the Editor-in-Chief of PRISM International, Western Canada's oldest literary magazine, and an MFA candidate in Creative Writing at the University of British Columbia. Their work sits at the intersection of storytelling, equity, and community — from producing experimental films that have screened internationally to facilitating equity and inclusion programming with UBC's Indigenous Initiatives team.</p>
+        <p class="about-bio">This scrollytelling piece was created for the CERC Migration Narratives Challenge, translating Nicholas Fraser's academic research into an accessible digital experience. It reflects Ihomehe's commitment to making complex research tangible, human, and available to the audiences who need it most.</p>
+        <div class="about-tags">
+          <span class="about-tag">Digital Storytelling</span>
+          <span class="about-tag">Migration Research</span>
+          <span class="about-tag">Data Visualization</span>
+          <span class="about-tag">Editorial Leadership</span>
+          <span class="about-tag">Equity & Inclusion</span>
+          <span class="about-tag">Experimental Film</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Created for the CERC Migration Narratives Challenge &middot; Based on research by Nicholas A. R. Fraser, Toronto Metropolitan University &middot; 2025</p>
+</footer>
+
+<script>
+// ===== PARTICLES =====
+const canvas = document.getElementById('particlesCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let animFrame;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class Particle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 2 + 0.5;
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.speedY = (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.3 + 0.05;
+    this.pulse = Math.random() * Math.PI * 2;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.pulse += 0.01;
+    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+  }
+  draw() {
+    const theme = document.documentElement.dataset.theme;
+    const baseColor = theme === 'light' ? '43,108,176' : '74,144,217';
+    const pulsedOpacity = this.opacity + Math.sin(this.pulse) * 0.05;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${baseColor}, ${pulsedOpacity})`;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < 60; i++) particles.push(new Particle());
+
+function drawConnections() {
+  const theme = document.documentElement.dataset.theme;
+  const baseColor = theme === 'light' ? '43,108,176' : '74,144,217';
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(${baseColor}, ${0.06 * (1 - dist / 120)})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  drawConnections();
+  animFrame = requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ===== THEME TOGGLE =====
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.addEventListener('click', () => {
+  const html = document.documentElement;
+  const current = html.dataset.theme;
+  html.dataset.theme = current === 'dark' ? 'light' : 'dark';
+  themeToggle.textContent = html.dataset.theme === 'dark' ? '🌙' : '☀️';
+});
+
+// ===== SOUND ENGINE =====
+let audioCtx = null;
+let soundEnabled = false;
+const soundToggle = document.getElementById('soundToggle');
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playTone(freq, duration, vol = 0.03, type = 'sine', delay = 0) {
+  if (!soundEnabled || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  const t = audioCtx.currentTime + delay;
+  osc.frequency.setValueAtTime(freq, t);
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(vol, t + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(t);
+  osc.stop(t + duration);
+}
+
+function playSweep(startFreq, endFreq, duration, vol = 0.02, type = 'sine') {
+  if (!soundEnabled || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(startFreq, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(endFreq, audioCtx.currentTime + duration);
+  gain.gain.setValueAtTime(0, audioCtx.currentTime);
+  gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration);
+}
+
+function playNoise(duration, vol = 0.01) {
+  if (!soundEnabled || !audioCtx) return;
+  const bufferSize = audioCtx.sampleRate * duration;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
+  const source = audioCtx.createBufferSource();
+  source.buffer = buffer;
+  const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 400;
+  gain.gain.setValueAtTime(0, audioCtx.currentTime);
+  gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.1);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  source.connect(filter);
+  filter.connect(gain);
+  gain.connect(audioCtx.destination);
+  source.start();
+}
+
+// Section 0: Hero — ascending welcome chime
+function soundHero() {
+  playTone(523.25, 1.0, 0.025, 'sine');
+  playTone(659.25, 0.8, 0.02, 'sine', 0.15);
+  playTone(783.99, 0.7, 0.018, 'sine', 0.3);
+  playTone(1046.5, 0.6, 0.012, 'sine', 0.5);
+}
+
+// Section 1: Timeline — ticking clock pulse
+function soundTimeline() {
+  for (let i = 0; i < 5; i++) {
+    playTone(800, 0.05, 0.02, 'square', i * 0.2);
+    playTone(600, 0.03, 0.01, 'square', i * 0.2 + 0.05);
+  }
+}
+
+// Section 2: Context — low tension building drone
+function soundContext() {
+  playTone(110, 2.0, 0.025, 'triangle');
+  playTone(165, 2.0, 0.015, 'sine', 0.3);
+  playNoise(1.5, 0.008);
+}
+
+// Section 3: Hypotheses — two contrasting tones
+function soundHypotheses() {
+  // Dissonant (H1 - amplification)
+  playTone(311.13, 0.6, 0.018, 'sawtooth');
+  playTone(329.63, 0.6, 0.015, 'sawtooth');
+  // Then resolved (H2 - reflection)
+  playTone(392, 0.8, 0.02, 'sine', 0.7);
+  playTone(523.25, 0.8, 0.018, 'sine', 0.7);
+}
+
+// Section 4: Spike — rising pitch sweep (data surging)
+function soundSpike() {
+  playSweep(200, 900, 1.5, 0.025, 'sawtooth');
+  playTone(900, 0.3, 0.015, 'sine', 1.5);
+}
+
+// Section 5: Word associations — scattered data pings
+function soundWords() {
+  const freqs = [600, 750, 500, 850, 700, 550, 900, 650, 800, 500, 720];
+  freqs.forEach((f, i) => {
+    playTone(f, 0.15, 0.012, 'sine', i * 0.09);
+  });
+}
+
+// Section 6: Central finding (88 vs 14) — deep bass impact then reveal
+function soundCentralFinding() {
+  playTone(65.41, 1.5, 0.035, 'triangle');
+  playNoise(0.3, 0.02);
+  playTone(261.63, 0.8, 0.02, 'sine', 0.5);
+  playTone(329.63, 0.8, 0.018, 'sine', 0.6);
+  playTone(392, 1.0, 0.02, 'sine', 0.7);
+}
+
+// Section 7: Negative ≠ Hateful — warm clarifying chord
+function soundDistinction() {
+  playTone(261.63, 1.5, 0.02, 'sine');
+  playTone(329.63, 1.5, 0.018, 'sine', 0.05);
+  playTone(392, 1.5, 0.016, 'sine', 0.1);
+  playTone(523.25, 1.2, 0.012, 'sine', 0.15);
+}
+
+// Section 8: Influencers — sharp staccato alert tones
+function soundInfluencers() {
+  playTone(880, 0.1, 0.02, 'square');
+  playTone(880, 0.1, 0.02, 'square', 0.15);
+  playTone(1108.73, 0.15, 0.018, 'square', 0.3);
+  playTone(660, 0.3, 0.015, 'triangle', 0.5);
+}
+
+// Section 9: Tweets — typewriter clicks
+function soundTweets() {
+  for (let i = 0; i < 8; i++) {
+    const f = 1200 + Math.random() * 600;
+    playTone(f, 0.02, 0.015, 'square', i * 0.07);
+  }
+}
+
+// Section 10: Verdict — minor resolving to major (tension → clarity)
+function soundVerdict() {
+  // Minor chord (tension)
+  playTone(261.63, 0.6, 0.02, 'sine');
+  playTone(311.13, 0.6, 0.018, 'sine');
+  playTone(392, 0.6, 0.016, 'sine');
+  // Resolve to major
+  playTone(261.63, 1.2, 0.022, 'sine', 0.8);
+  playTone(329.63, 1.2, 0.02, 'sine', 0.8);
+  playTone(392, 1.2, 0.018, 'sine', 0.8);
+  playTone(523.25, 1.0, 0.015, 'sine', 0.9);
+}
+
+// Section 11: Closing — slow warm fade
+function soundClosing() {
+  playTone(261.63, 2.5, 0.02, 'sine');
+  playTone(329.63, 2.5, 0.018, 'sine', 0.1);
+  playTone(392, 2.5, 0.016, 'sine', 0.2);
+  playTone(523.25, 2.0, 0.014, 'sine', 0.4);
+  playTone(659.25, 1.5, 0.01, 'sine', 0.8);
+}
+
+// Section 12: About — gentle single note
+function soundAbout() {
+  playTone(440, 1.0, 0.015, 'sine');
+}
+
+const sectionSounds = {
+  0: soundHero,
+  1: soundTimeline,
+  2: soundContext,
+  3: soundHypotheses,
+  4: soundSpike,
+  5: soundWords,
+  6: soundCentralFinding,
+  7: soundDistinction,
+  8: soundInfluencers,
+  9: soundTweets,
+  10: soundVerdict,
+  11: soundClosing,
+  12: soundAbout
+};
+
+soundToggle.addEventListener('click', () => {
+  initAudio();
+  soundEnabled = !soundEnabled;
+  soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+  soundToggle.classList.toggle('muted', !soundEnabled);
+  if (soundEnabled) soundHero();
+});
+
+// ===== SCROLL REVEAL =====
+const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && !entry.target.classList.contains('visible')) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+revealElements.forEach(el => revealObserver.observe(el));
+
+// ===== PROGRESS BAR =====
+const progressBar = document.getElementById('progressBar');
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  progressBar.style.width = (scrollTop / docHeight) * 100 + '%';
+});
+
+// ===== NAV DOTS =====
+const sections = document.querySelectorAll('[data-section]');
+const navDots = document.getElementById('navDots');
+sections.forEach((_, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'nav-dot';
+  dot.addEventListener('click', () => sections[i].scrollIntoView({ behavior: 'smooth' }));
+  navDots.appendChild(dot);
+});
+const dotEls = document.querySelectorAll('.nav-dot');
+let lastSection = -1;
+const dotObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const idx = parseInt(entry.target.dataset.section);
+      dotEls.forEach((d, i) => d.classList.toggle('active', i === idx));
+      if (idx !== lastSection) {
+        lastSection = idx;
+        if (sectionSounds[idx]) sectionSounds[idx]();
+      }
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => dotObserver.observe(s));
+
+// ===== COUNTERS =====
+const counters = document.querySelectorAll('.counter');
+let counterAnimated = new Set();
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && !counterAnimated.has(entry.target)) {
+      counterAnimated.add(entry.target);
+      const el = entry.target;
+      const target = parseFloat(el.dataset.target);
+      const suffix = el.dataset.suffix || '';
+      const isDecimal = target % 1 !== 0;
+      const duration = 1500;
+      const start = performance.now();
+      function update(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = eased * target;
+        el.textContent = isDecimal ? current.toFixed(1) + suffix : Math.floor(current).toLocaleString() + suffix;
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+  });
+}, { threshold: 0.5 });
+counters.forEach(c => counterObserver.observe(c));
+
+// ===== VOLUME CHART =====
+const volumeData = [
+  { month: 'Jan', value: 50 }, { month: 'Feb', value: 75 },
+  { month: 'Mar', value: 100 }, { month: 'Apr', value: 150 },
+  { month: 'May', value: 650 }, { month: 'Jun', value: 1850 },
+  { month: 'Jul', value: 2500 }, { month: 'Aug', value: 3638 },
+  { month: 'Sep', value: 2850 }, { month: 'Oct', value: 1750 },
+  { month: 'Nov', value: 100 }, { month: 'Dec', value: 50 }
+];
+const maxVol = Math.max(...volumeData.map(d => d.value));
+const volumeChart = document.getElementById('volumeChart');
+volumeData.forEach(d => {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'volume-bar-wrapper';
+  const bar = document.createElement('div');
+  bar.className = 'volume-bar' + (d.month === 'Aug' ? ' peak' : '');
+  bar.dataset.height = ((d.value / maxVol) * 200) + 'px';
+  const num = document.createElement('span');
+  num.className = 'volume-bar-num';
+  num.textContent = d.value >= 500 ? d.value.toLocaleString() : '';
+  bar.appendChild(num);
+  const month = document.createElement('span');
+  month.className = 'volume-month';
+  month.textContent = d.month;
+  wrapper.appendChild(bar);
+  wrapper.appendChild(month);
+  volumeChart.appendChild(wrapper);
+});
+const volumeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.volume-bar').forEach((bar, i) => {
+        setTimeout(() => { bar.style.height = bar.dataset.height; bar.classList.add('animated'); }, i * 80);
+      });
+      volumeObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.3 });
+volumeObserver.observe(volumeChart);
+
+// ===== WORD ASSOCIATION CHART =====
+const assocData = [
+  { word: 'airports', val: 0.51 }, { word: 'veiled', val: 0.49 },
+  { word: 'socioeconomic', val: 0.46 }, { word: 'lower', val: 0.45 },
+  { word: 'pattern', val: 0.44 }, { word: 'pandemic', val: 0.38 },
+  { word: 'conservatives', val: 0.36 }, { word: 'unemployment', val: 0.33 },
+  { word: 'rates', val: 0.26 }, { word: 'agenda', val: 0.23 },
+  { word: 'crime', val: 0.22 }
+];
+const assocChart = document.getElementById('assocChart');
+assocData.forEach((d, i) => {
+  const row = document.createElement('div');
+  row.className = 'bar-row';
+  row.innerHTML = `<span class="bar-label">${d.word}</span><div class="bar-track"><div class="bar-fill bar-accent" data-width="${(d.val / 0.6) * 100}%" style="transition-delay:${i * 0.08}s"><span class="bar-value">${d.val.toFixed(2)}</span></div></div>`;
+  assocChart.appendChild(row);
+});
+
+// ===== BLAME CHART =====
+const blameData = [
+  { label: 'The Government', val: 88, color: 'bar-accent' },
+  { label: 'Other / Neutral', val: 22, color: 'bar-warm' },
+  { label: 'Immigrants', val: 14, color: 'bar-red' }
+];
+const blameChart = document.getElementById('blameChart');
+blameData.forEach((d, i) => {
+  const row = document.createElement('div');
+  row.className = 'bar-row';
+  row.innerHTML = `<span class="bar-label">${d.label}</span><div class="bar-track"><div class="bar-fill ${d.color}" data-width="${(d.val / 88) * 100}%" style="transition-delay:${i * 0.15}s"><span class="bar-value">${d.val}</span></div></div>`;
+  blameChart.appendChild(row);
+});
+
+// ===== ANIMATE BARS ON SCROLL =====
+document.querySelectorAll('.chart-container').forEach(c => {
+  const barObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.bar-fill').forEach(fill => { fill.style.width = fill.dataset.width; });
+        barObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  barObs.observe(c);
+});
+
+// ===== SHARE BUTTONS =====
+const pageUrl = encodeURIComponent(window.location.href);
+const pageTitle = encodeURIComponent('Immigration Narratives in Crisis — What did Canadians actually say about immigration during the housing crisis?');
+
+document.getElementById('shareTwitter').addEventListener('click', (e) => {
+  e.preventDefault();
+  window.open(`https://twitter.com/intent/tweet?text=${pageTitle}&url=${pageUrl}`, '_blank', 'width=550,height=420');
+});
+
+document.getElementById('shareLinkedIn').addEventListener('click', (e) => {
+  e.preventDefault();
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${pageUrl}`, '_blank', 'width=550,height=420');
+});
+
+document.getElementById('copyLink').addEventListener('click', () => {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    const btn = document.getElementById('copyLink');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Copied!';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  });
+});
+</script>
+
+</body>
+</html>
